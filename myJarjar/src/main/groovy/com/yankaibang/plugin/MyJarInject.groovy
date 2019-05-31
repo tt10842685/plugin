@@ -1,5 +1,6 @@
 package com.yankaibang.plugin
 
+import com.android.build.api.transform.DirectoryInput
 import com.android.build.api.transform.JarInput
 import com.google.common.io.ByteStreams
 import com.google.common.io.Files
@@ -17,8 +18,8 @@ class MyJarInject {
 
     private final def pool = ClassPool.getDefault()
 
-    boolean injectDir(JarInput jarInput, File desc, Project project) {
-        pool.appendClassPath(jarInput.file.absolutePath)
+    boolean injectDir(DirectoryInput directoryInput, File desc, Project project) {
+        pool.appendClassPath(directoryInput.file.absolutePath)
         return false
     }
 
