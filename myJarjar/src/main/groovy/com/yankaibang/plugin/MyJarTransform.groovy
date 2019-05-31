@@ -59,9 +59,13 @@ class MyJarTransform extends Transform {
         }
     }
 
+    void clean() {
+        inject.clean()
+    }
+
     @Override
     String getName() {
-        return "ComponentCode"
+        return "MyJarTransform"
     }
 
     @Override

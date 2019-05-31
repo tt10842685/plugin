@@ -17,16 +17,17 @@ import java.util.zip.ZipOutputStream
 class MyJarInject {
 
     private final def pool = ClassPool.getDefault()
+    private final def paths = new ArrayList()
 
     boolean injectDir(DirectoryInput directoryInput, File desc, Project project) {
-        pool.appendClassPath(directoryInput.file.absolutePath)
+        paths.add(pool.appendClassPath(directoryInput.file.absolutePath))
         return false
     }
 
     boolean injectJar(JarInput jarInput, File desc, Project project) {
         String jarInPath = jarInput.file.absolutePath
         String jarOutPath = desc.absolutePath
-        pool.appendClassPath(new JarClassPath(jarInPath))
+        paths.add(pool.appendClassPath(new JarClassPath(jarInPath)))
 
         def jarInfo = getJarInfo(jarInput, project)
         if(jarInfo == null) return false
@@ -36,6 +37,13 @@ class MyJarInject {
         process(jarInPath, jarOutPath, jarInfo)
         pool.removeClassPath(androidClassPath)
         return true
+    }
+
+    void clean() {
+        paths.each {
+            pool.removeClassPath(it)
+        }
+        paths.clear()
     }
 
     private JarInfo getJarInfo(JarInput jarInput, Project project) {
