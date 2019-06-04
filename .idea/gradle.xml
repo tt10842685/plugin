@@ -10,7 +10,9 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/annotation-plugin" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/click-anti-shake" />
             <option value="$PROJECT_DIR$/myJarjar" />
+            <option value="$PROJECT_DIR$/secondlibrary" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

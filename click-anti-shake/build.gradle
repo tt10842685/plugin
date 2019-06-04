@@ -1,0 +1,25 @@
+apply plugin: 'groovy'
+apply plugin: 'maven'
+
+dependencies {
+    compile 'com.android.tools.build:gradle:3.0.1'
+    compile 'org.javassist:javassist:3.20.0-GA'
+    compile gradleApi()
+    //groovy sdk
+    compile localGroovy()
+}
+
+uploadArchives{
+    repositories.mavenDeployer {
+        repository(url: uri('../repo'))
+        pom.groupId = 'com.yankaibang.click-anti-shake'
+        pom.artifactId = 'click-anti-shake'
+        pom.version = '1.0.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+    google()
+    jcenter()
+}
