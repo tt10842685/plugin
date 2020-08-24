@@ -29,6 +29,8 @@ class ClickAntiShakeTransform extends Transform {
                 TransformManager.PROJECT_ONLY, Format.DIRECTORY)
         inject.makeClass(makeClassDest, project)
 
+        inject.appendClassPath(transformInvocation)
+
         transformInvocation.inputs.each { TransformInput input ->
             //对类型为jar文件的input进行遍历
             input.jarInputs.each { JarInput jarInput ->

@@ -2,19 +2,16 @@ package com.yankaibang.plugin
 
 import com.android.build.api.transform.DirectoryInput
 import com.android.build.api.transform.JarInput
+import com.android.build.api.transform.TransformInput
+import com.android.build.api.transform.TransformInvocation
 import com.google.common.io.ByteStreams
 import com.google.common.io.Files
 import com.yankaibang.plugin.bean.ClickAntiShake
-import javassist.CannotCompileException
 import javassist.ClassPool
 import javassist.CtClass
 import javassist.CtField
 import javassist.CtMethod
 import javassist.CtNewMethod
-import javassist.JarClassPath
-import javassist.NotFoundException
-import javassist.expr.ExprEditor
-import javassist.expr.MethodCall
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 
@@ -29,6 +26,20 @@ class ClickAntiShakeInject {
     private CtClass onClickListenerCtClass
     private CtClass viewCtClass
     private boolean makeClassComplete = false
+
+    void appendClassPath(TransformInvocation transformInvocation) {
+        transformInvocation.inputs.each { TransformInput input ->
+            //对类型为jar文件的input进行遍历
+            input.jarInputs.each { JarInput jarInput ->
+                paths.add(pool.appendClassPath(jarInput.file.absolutePath))
+            }
+
+            //对类型为“文件夹”的input进行遍历
+            input.directoryInputs.each { DirectoryInput directoryInput ->
+                paths.add(pool.appendClassPath(directoryInput.file.absolutePath))
+            }
+        }
+    }
 
     void makeClass(File desc, Project project) {
         if(makeClassComplete) return
@@ -72,8 +83,6 @@ class ClickAntiShakeInject {
     }
 
     boolean injectDir(DirectoryInput directoryInput, File desc, Project project) {
-        paths.add(pool.appendClassPath(directoryInput.file.absolutePath))
-
         //project.android.bootClasspath 加入android.jar，否则找不到android相关的所有类
         def androidClassPath = pool.appendClassPath(project.android.bootClasspath[0].toString())
         processDir(directoryInput.file.absolutePath, desc.absolutePath)
@@ -84,7 +93,6 @@ class ClickAntiShakeInject {
     boolean injectJar(JarInput jarInput, File desc, Project project) {
         String jarInPath = jarInput.file.absolutePath
         String jarOutPath = desc.absolutePath
-        paths.add(pool.appendClassPath(jarInPath))
 
         if(!checkByName(project, jarInput.name)) return false
         if(jarInput.name.startsWith("org.jetbrains.")) return false
