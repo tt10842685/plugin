@@ -43,11 +43,11 @@ class ClickAntiShakeInject {
 
     void makeClassImpl(File desc, Project project) {
         ClickAntiShake clickAntiShake = project.extensions.getByName('clickAntiShake')
-        if(clickAntiShake.antiMillis < 0) clickAntiShake = new ClickAntiShake()
+        if(clickAntiShake.antiMillis < 0) clickAntiShake = ClickAntiShake.DEFAULT_ANTI_MILLIS
 
         CtClass ctClass = pool.makeClass("com.yankaibang.plugin.ClickAntiShakeHelper")
 
-        CtField ctField = CtField.make("private java.util.Map clickAntiShakeTimes = new java.util.HashMap();", ctClass)
+        CtField ctField = CtField.make("private java.util.Map clickAntiShakeTimes = new java.util.WeakHashMap();", ctClass)
         ctClass.addField(ctField)
 
         CtMethod ctMethod = CtNewMethod.make(
@@ -86,14 +86,30 @@ class ClickAntiShakeInject {
         String jarOutPath = desc.absolutePath
         paths.add(pool.appendClassPath(jarInPath))
 
+        if(!checkByName(project, jarInput.name)) return false
         if(jarInput.name.startsWith("org.jetbrains.")) return false
         if(jarInput.name.startsWith("com.android.")) return false
         if(jarInput.name.startsWith("android.")) return false
+        if(jarInput.name.startsWith("androidx.")) return false
 
         //project.android.bootClasspath 加入android.jar，否则找不到android相关的所有类
         def androidClassPath = pool.appendClassPath(project.android.bootClasspath[0].toString())
         processJar(jarInPath, jarOutPath)
         pool.removeClassPath(androidClassPath)
+        return true
+    }
+
+    private boolean checkByName(Project project, String name) {
+        ClickAntiShake clickAntiShake = project.extensions.getByName('clickAntiShake')
+
+        if (!clickAntiShake.matchJarNames.isEmpty()) {
+            return clickAntiShake.matchJarNames.contains(name)
+        }
+
+        if (!clickAntiShake.excludeJarNames.isEmpty()) {
+            return !clickAntiShake.excludeJarNames.contains(name)
+        }
+
         return true
     }
 

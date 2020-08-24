@@ -1,1 +1,2 @@
 include ':app', ':myJarjar', ':annotation-plugin', ':click-anti-shake', ':secondlibrary'
+include ':thirdlibrary'
