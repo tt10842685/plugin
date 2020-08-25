@@ -25,7 +25,7 @@ class ClickAntiShakeInject {
     private final def paths = new ArrayList()
     private CtClass onClickListenerCtClass
     private CtClass viewCtClass
-    private boolean makeClassComplete = false
+    private HashSet makeClassCompletes = new HashSet<String>()
 
     void appendClassPath(TransformInvocation transformInvocation) {
         transformInvocation.inputs.each { TransformInput input ->
@@ -42,14 +42,16 @@ class ClickAntiShakeInject {
     }
 
     void makeClass(File desc, Project project) {
-        if(makeClassComplete) return
-        paths.add(pool.appendClassPath(desc.absolutePath))
+        def path = desc.absolutePath
+        if(makeClassCompletes.contains(path)) return
+        paths.add(pool.appendClassPath(path))
+        System.out.println("makeClass " + path)
 
         //project.android.bootClasspath 加入android.jar，否则找不到android相关的所有类
         def androidClassPath = pool.appendClassPath(project.android.bootClasspath[0].toString())
         makeClassImpl(desc, project)
         pool.removeClassPath(androidClassPath)
-        makeClassComplete = true
+        makeClassCompletes.add(path)
     }
 
     void makeClassImpl(File desc, Project project) {
@@ -126,7 +128,7 @@ class ClickAntiShakeInject {
             pool.removeClassPath(it)
         }
         paths.clear()
-        makeClassComplete = false
+        makeClassCompletes.clear()
     }
 
     private void processDir(String dirInPath, String dirOutPath) {
